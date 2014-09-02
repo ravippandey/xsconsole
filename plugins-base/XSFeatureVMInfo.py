@@ -101,7 +101,9 @@ class XSFeatureVMInfo:
     @classmethod
     def AllActivateHandler(cls):
         vmIDs = Task.Sync(lambda x: x.xenapi.VM.get_all())
-        if len(vmIDs) > 100:
+        vmRecords = [Task.Sync(lambda x: x.xenapi.VM.get_record(vm)) for vm in vmIDs]
+        trueVMs = [rec for rec in vmRecords if not(rec["is_a_template"]) and not(rec["is_control_domain"])]
+        if len(trueVMs) > 100:
             Layout.Inst().PushDialogue(InfoDialogue(Lang('This feature is unavailable in Pools with more than 100 Virtual Machines')))
         else:
             Layout.Inst().TopDialogue().ChangeMenu('MENU_ALLVM')
